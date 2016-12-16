@@ -19,6 +19,7 @@ class ViewController: UIViewController {
     var analyTimer = Timer()
     var startTime = TimeInterval()
     var isPaused:Bool = false
+    var apneaTimer = Timer()
     
     
     @IBOutlet weak var timeLabel: UILabel!
@@ -30,7 +31,7 @@ class ViewController: UIViewController {
            
             analyTimer = Timer()
             analyTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.updateUIPlusText), userInfo: nil, repeats: true)
-            
+            startTime = NSDate.timeIntervalSinceReferenceDate
             AudioKit.start()
             
             
@@ -43,13 +44,16 @@ class ViewController: UIViewController {
     
     @IBAction func pauseTimer(_ sender: AnyObject) {
         analyTimer.invalidate()
+        AudioKit.stop()
         
     }
     
     @IBAction func resetTimer(_ sender: AnyObject) {
         analyTimer.invalidate()
+        AudioKit.stop()
         timeLabel.text = "00:00:00"
         apneaCountLabel.text = "0"
+        setupPlot()
     }
     
     
@@ -67,11 +71,22 @@ class ViewController: UIViewController {
     var audioPlayer = AVAudioPlayer()
     
     
-    
+    func updateCounter() {
+        count += 1
+    }
     
     
     // Plot for Audio Analysis
     func setupPlot() {
+        // MIC
+        AKSettings.audioInputEnabled = true
+        mic = AKMicrophone()
+        tracker = AKFrequencyTracker.init(mic)
+        silence = AKBooster(tracker, gain: 0)
+        
+        
+        //Audio Analysis
+        AudioKit.output = silence
         let plot = AKNodeOutputPlot(mic, frame:audioInputPlot.bounds)
         plot.plotType = .rolling
         plot.shouldFill = true
@@ -83,23 +98,15 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-       
-        
+        setupPlot()
+        AudioKit.stop()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // MIC
-        AKSettings.audioInputEnabled = true
-        mic = AKMicrophone()
-        tracker = AKFrequencyTracker.init(mic)
-        silence = AKBooster(tracker, gain: 0)
-        startTime = NSDate.timeIntervalSinceReferenceDate
         
-        //Audio Analysis
-        AudioKit.output = silence
-        setupPlot()
+       
 
     }
     
@@ -147,22 +154,25 @@ class ViewController: UIViewController {
         print("Before: \(before)")
         print(tracker.amplitude)
         print(count)
+        print(apneaCount)
         print(isApnea)
         print((abs(tracker.amplitude - before) / tracker.amplitude))
-        if((abs(tracker.amplitude - before) / tracker.amplitude) < 1) {
+        if((abs(tracker.amplitude - before) / tracker.amplitude) < 1 && !apneaTimer.isValid) {
             isApnea = true
             
         }
         else {
             isApnea = false
             count = 0
+            
         }
-        if( count == 100) {
+        if( count >= 100) {
             count = 0
             if(isApnea) {
                 apneaCount += 1
                 apneaCountLabel.text = String(apneaCount)
                 AudioServicesPlaySystemSound(1000)
+                
             }
         }
         
