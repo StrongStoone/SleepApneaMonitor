@@ -16,8 +16,7 @@ import AudioToolbox
 
 class ViewController: UIViewController {
     
-    var timer = Timer()
-    var isPlaying = false
+    var analyTimer = Timer()
     var startTime = TimeInterval()
     var isPaused:Bool = false
     
@@ -27,37 +26,30 @@ class ViewController: UIViewController {
     @IBOutlet var apneaCountLabel: UILabel!
     @IBOutlet var audioInputPlot: EZAudioPlot!
     @IBAction func startTimer(_ sender: AnyObject) {
-        if !timer.isValid {
+        if !analyTimer.isValid {
+           
+            analyTimer = Timer()
+            analyTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.updateUIPlusText), userInfo: nil, repeats: true)
             
-            let aSelector : Selector = #selector(ViewController.updateTime)
-            timer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: aSelector,     userInfo: nil, repeats: true)
-            startTime = NSDate.timeIntervalSinceReferenceDate
-            
-            
-            
-            //Audio Analysis
-            AudioKit.output = silence
             AudioKit.start()
-            setupPlot()
-            Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.updateUI), userInfo: nil, repeats: true)
+            
             
         }
-        
+       
         
         
         
     }
     
     @IBAction func pauseTimer(_ sender: AnyObject) {
-        timer.invalidate()
-        isPaused = true
+        analyTimer.invalidate()
         
     }
     
     @IBAction func resetTimer(_ sender: AnyObject) {
-        
-        timer.invalidate()
+        analyTimer.invalidate()
         timeLabel.text = "00:00:00"
+        apneaCountLabel.text = "0"
     }
     
     
@@ -91,51 +83,29 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // MIC
-        AKSettings.audioInputEnabled = true
-        mic = AKMicrophone()
-        tracker = AKFrequencyTracker.init(mic)
-        silence = AKBooster(tracker, gain: 0)
-        
+       
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        // MIC
+        AKSettings.audioInputEnabled = true
+        mic = AKMicrophone()
+        tracker = AKFrequencyTracker.init(mic)
+        silence = AKBooster(tracker, gain: 0)
+        startTime = NSDate.timeIntervalSinceReferenceDate
         
+        //Audio Analysis
+        AudioKit.output = silence
+        setupPlot()
+
     }
     
     
     
-    func updateUI() {
-        amplitudeLabel.text = String(format: "%0.2f", tracker.amplitude)
-        count += 1
-        print("Before: \(before)")
-        print(tracker.amplitude)
-        print(count)
-        print(isApnea)
-        print((abs(tracker.amplitude - before) / tracker.amplitude))
-        if((abs(tracker.amplitude - before) / tracker.amplitude) < 1) {
-            isApnea = true
-        }
-        else {
-            isApnea = false
-            count = 0
-        }
-        if( count == 110) {
-            count = 0
-            if(isApnea) {
-                apneaCount += 1
-                apneaCountLabel.text = String(apneaCount)
-                AudioServicesPlaySystemSound(1000)
-            }
-        }
-        
-        before = tracker.amplitude
-    }
-    
-    func updateTime() {
+    func updateUIPlusText() {
         
         let currentTime = NSDate.timeIntervalSinceReferenceDate
         
@@ -169,9 +139,37 @@ class ViewController: UIViewController {
         
         timeLabel.text = "\(strMinutes):\(strSeconds):\(strFraction)"
         
+    
+    
+
+        amplitudeLabel.text = String(format: "%0.2f", tracker.amplitude)
+        count += 1
+        print("Before: \(before)")
+        print(tracker.amplitude)
+        print(count)
+        print(isApnea)
+        print((abs(tracker.amplitude - before) / tracker.amplitude))
+        if((abs(tracker.amplitude - before) / tracker.amplitude) < 1) {
+            isApnea = true
+            
+        }
+        else {
+            isApnea = false
+            count = 0
+        }
+        if( count == 100) {
+            count = 0
+            if(isApnea) {
+                apneaCount += 1
+                apneaCountLabel.text = String(apneaCount)
+                AudioServicesPlaySystemSound(1000)
+            }
+        }
+        
+        before = tracker.amplitude
     }
     
-    
+           
     
 }
 

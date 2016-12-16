@@ -105,7 +105,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="50" translatesAutoresizingMaskIntoConstraints="NO" id="qGg-mq-WZl">
                                 <rect key="frame" x="88" y="536" width="200" height="40"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ofY-nX-ZVI">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ofY-nX-ZVI" userLabel="StartTimer">
                                         <rect key="frame" x="0.0" y="0.0" width="36" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="36" id="8K6-jn-LFn"/>
@@ -114,8 +114,11 @@
                                             <constraint firstAttribute="height" constant="40" id="xh8-Ad-bzt"/>
                                         </constraints>
                                         <state key="normal" backgroundImage="play"/>
+                                        <connections>
+                                            <action selector="startTimer:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cLa-43-O8B"/>
+                                        </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRc-cH-QC9">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YRc-cH-QC9" userLabel="PauseTimer">
                                         <rect key="frame" x="86" y="0.0" width="24" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="Q2R-Cb-TR9"/>
@@ -124,8 +127,11 @@
                                             <constraint firstAttribute="width" constant="24" id="hCa-ZA-5KP"/>
                                         </constraints>
                                         <state key="normal" backgroundImage="stop"/>
+                                        <connections>
+                                            <action selector="pauseTimer:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Bry-PF-fTL"/>
+                                        </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hLC-nQ-HMm">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hLC-nQ-HMm" userLabel="ResetTimer">
                                         <rect key="frame" x="160" y="0.0" width="40" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="40" id="0mc-cF-pzQ"/>
@@ -134,6 +140,9 @@
                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="yLF-kp-oLd"/>
                                         </constraints>
                                         <state key="normal" backgroundImage="reset2"/>
+                                        <connections>
+                                            <action selector="resetTimer:" destination="BYZ-38-t0r" eventType="touchUpInside" id="xyb-MW-thf"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </stackView>
@@ -168,7 +177,9 @@
                     </view>
                     <connections>
                         <outlet property="amplitudeLabel" destination="iN5-qX-s3Y" id="jyC-0H-2Uc"/>
+                        <outlet property="apneaCountLabel" destination="sSr-QP-axQ" id="LbC-qH-S8f"/>
                         <outlet property="audioInputPlot" destination="0kn-C6-U44" id="wGX-Jm-nXh"/>
+                        <outlet property="timeLabel" destination="LrG-lQ-EnG" id="vRi-xG-AcF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
