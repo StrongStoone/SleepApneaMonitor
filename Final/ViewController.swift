@@ -16,64 +16,23 @@ import AudioToolbox
 
 class ViewController: UIViewController {
     
+    // Variables
+    var mic: AKMicrophone!
+    var tracker: AKFrequencyTracker!
+    var silence: AKBooster!
+    var motionManager = CMMotionManager()
+    var count: Int = 0
+    var before: Double = 0
+    var isApnea:Bool = false
+    var apneaCount = 0
+    var audioPlayer = AVAudioPlayer()
     var analyTimer = Timer()
     var startTime = TimeInterval()
     var isPaused:Bool = false
     var apneaTimer = Timer()
     
     
-    @IBOutlet weak var timeLabel: UILabel!
-    @IBOutlet var amplitudeLabel: UILabel!
-    @IBOutlet var apneaCountLabel: UILabel!
-    @IBOutlet var audioInputPlot: EZAudioPlot!
-    @IBAction func startTimer(_ sender: AnyObject) {
-        if !analyTimer.isValid {
-           
-            analyTimer = Timer()
-            analyTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.updateUIPlusText), userInfo: nil, repeats: true)
-            startTime = NSDate.timeIntervalSinceReferenceDate
-            AudioKit.start()
-            
-            
-        }
-       
-        
-        
-        
-    }
     
-    @IBAction func pauseTimer(_ sender: AnyObject) {
-        analyTimer.invalidate()
-        AudioKit.stop()
-        
-    }
-    
-    @IBAction func resetTimer(_ sender: AnyObject) {
-        analyTimer.invalidate()
-        AudioKit.stop()
-        timeLabel.text = "00:00:00"
-        apneaCountLabel.text = "0"
-        setupPlot()
-    }
-    
-    
-    
-    
-    // Variables
-    var mic: AKMicrophone!
-    var tracker: AKFrequencyTracker!
-    var silence: AKBooster!
-    lazy var motionManager = CMMotionManager()
-    var count: Int = 0
-    lazy var before: Double = 0
-    var isApnea:Bool = false
-    var apneaCount = 0
-    var audioPlayer = AVAudioPlayer()
-    
-    
-    func updateCounter() {
-        count += 1
-    }
     
     
     // Plot for Audio Analysis
@@ -95,25 +54,10 @@ class ViewController: UIViewController {
         audioInputPlot.addSubview(plot)
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        setupPlot()
-        AudioKit.stop()
-    }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    func update() {
         
-        
-       
-
-    }
-    
-    
-    
-    func updateUIPlusText() {
-        
+        // Time handler
         let currentTime = NSDate.timeIntervalSinceReferenceDate
         
         //Find the difference between current time and start time.
@@ -142,13 +86,13 @@ class ViewController: UIViewController {
         let strSeconds = String(format: "%02d", seconds)
         let strFraction = String(format: "%02d", fraction)
         
-        //concatenate minuets, seconds and milliseconds as assign it to the UILabel
+        //concatenate minutes, seconds and milliseconds as assign it to the UILabel
         
         timeLabel.text = "\(strMinutes):\(strSeconds):\(strFraction)"
         
-    
-    
-
+        
+        
+        // Sleep Apnea handler
         amplitudeLabel.text = String(format: "%0.2f", tracker.amplitude)
         count += 1
         print("Before: \(before)")
@@ -178,8 +122,56 @@ class ViewController: UIViewController {
         
         before = tracker.amplitude
     }
+
     
-           
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupPlot()
+        AudioKit.stop()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+    }
+    
+    
+    
+    // ViewController
+    @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet var amplitudeLabel: UILabel!
+    @IBOutlet var apneaCountLabel: UILabel!
+    @IBOutlet var audioInputPlot: EZAudioPlot!
+    @IBAction func startTimer(_ sender: AnyObject) {
+        if !analyTimer.isValid {
+            
+            analyTimer = Timer()
+            analyTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.update), userInfo: nil, repeats: true)
+            startTime = NSDate.timeIntervalSinceReferenceDate
+            AudioKit.start()
+            
+            
+        }
+        
+        
+        
+        
+    }
+    
+    
+    @IBAction func pauseTimer(_ sender: AnyObject) {
+        analyTimer.invalidate()
+        AudioKit.stop()
+        
+    }
+    
+    @IBAction func resetTimer(_ sender: AnyObject) {
+        analyTimer.invalidate()
+        AudioKit.stop()
+        timeLabel.text = "00:00:00"
+        apneaCountLabel.text = "0"
+        setupPlot()
+    }
     
 }
 
